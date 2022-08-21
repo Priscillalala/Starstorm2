@@ -15,15 +15,14 @@ MonoBehaviour:
   skillName: ExecutionerFireIonGun
   skillNameToken: SS2_EXECUTIONER_IONGUN_NAME
   skillDescriptionToken: SS2_EXECUTIONER_IONGUN_DESCRIPTION
-  keywordTokens:
-  - SS2_KEYWORD_RECHARGING
+  keywordTokens: []
   icon: {fileID: 21300000, guid: bc3ed12a95933dc409bce08ccf2ac297, type: 3}
   activationStateMachineName: Weapon
   activationState:
     _typeName: EntityStates.Executioner.AimIonGun, Starstorm2, Version=1.0.0.0, Culture=neutral,
       PublicKeyToken=null
   interruptPriority: 1
-  baseRechargeInterval: 10
+  baseRechargeInterval: 12
   baseMaxStock: 10
   rechargeStock: 1
   requiredStock: 1

@@ -19,7 +19,7 @@ MonoBehaviour:
     serializedFields:
     - fieldName: baseDamageCoefficient
       fieldValue:
-        stringValue: 12
+        stringValue: 32
         objectValue: {fileID: 0}
     - fieldName: forceDamageCoefficient
       fieldValue:
@@ -31,11 +31,7 @@ MonoBehaviour:
         objectValue: {fileID: 0}
     - fieldName: maxDuration
       fieldValue:
-        stringValue: 10
-        objectValue: {fileID: 0}
-    - fieldName: upwardDuration
-      fieldValue:
-        stringValue: 0.9
+        stringValue: 11
         objectValue: {fileID: 0}
     - fieldName: slamRadius
       fieldValue:
@@ -69,5 +65,25 @@ MonoBehaviour:
           type: 3}
     - fieldName: slamCameraPosition
       fieldValue:
-        stringValue: 0 0 0
+        stringValue: 0 0 -17.5
+        objectValue: {fileID: 0}
+    - fieldName: damageCoefReductionPerEnemy
+      fieldValue:
+        stringValue: 3
+        objectValue: {fileID: 0}
+    - fieldName: lingeringInvincibiltyDuration
+      fieldValue:
+        stringValue: 0.2
+        objectValue: {fileID: 0}
+    - fieldName: upwardSpeed
+      fieldValue:
+        stringValue: 10
+        objectValue: {fileID: 0}
+    - fieldName: baseUpwardDuration
+      fieldValue:
+        stringValue: 0.7
+        objectValue: {fileID: 0}
+    - fieldName: damageMultiplierPerEnemy
+      fieldValue:
+        stringValue: 0.85
         objectValue: {fileID: 0}

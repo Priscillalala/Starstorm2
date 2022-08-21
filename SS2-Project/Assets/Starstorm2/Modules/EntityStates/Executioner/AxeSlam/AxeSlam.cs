@@ -4,6 +4,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using R2API;
+using Moonstorm.Starstorm2.DamageTypes;
+using RoR2.Skills;
+using Moonstorm.Starstorm2;
+using UnityEngine.Serialization;
 
 
 // Graph of Executioner's slam 
@@ -15,29 +20,33 @@ namespace EntityStates.Executioner
     public class AxeSlam : BaseSkillState
     {
         [TokenModifier("SS2_EXECUTIONER_AXE_DESCRIPTION", StatTypes.Percentage, 0)]
-        public static float baseDamageCoefficient = 12f;
+        public static float baseDamageCoefficient = 32f;
+        public static float damageMultiplierPerEnemy = 0.85f;
         ///<summary>What percentage of baseDamageCoefficient should be made up of force damage. Put a value between 0 and 1 you ape.</summary>
-        public static float forceDamageCoefficient = 0.5f;
+        //public static float forceDamageCoefficient = 0.5f;
         public static float procCoefficient = 1.0f;
         public static float maxDuration = 10f;
-        public static float upwardDuration = 0.9f;
+        public static float baseUpwardDuration = 0.9f;
         ///<summary>Duration between when he starts going up and starts going down</summary>
         public static float slamRadius = 14f;
         public static float recoil = 8f;
         public static float rechargePerKill = 1.0f;
-        public static float downwardAcceleration = -125f;
+        public static float upwardSpeed = 1f;
         public static AnimationCurveAsset upwardSpeedCoefficientCurve;
+        public static float downwardAcceleration = -125f;
+        public static float lingeringInvincibiltyDuration;
         public static GameObject slamEffect;
         public static GameObject axeEffect;
 
         //This must be recalculated if you fuck with this at all. It's just his velocity when he hits the ground when he doesn't move positions.
-        private const float standardDownwardVelocity = -302.2f;
+        //private const float standardDownwardVelocity = -302.2f;
 
         private Animator animator;
         private Vector3 flyVector = Vector3.up;
         private AnimateShaderAlpha[] axeShaderAnimators = Array.Empty<AnimateShaderAlpha>();
 
         private bool hasDoneIntro;
+        private float upwardDuration;
 
         private CameraTargetParams.CameraParamsOverrideHandle camOverrideHandle;
         private CharacterCameraParamsData slamCameraParams = new CharacterCameraParamsData
@@ -54,9 +63,9 @@ namespace EntityStates.Executioner
         {
             base.OnEnter();
             animator = GetModelAnimator();
-
+            upwardDuration = baseUpwardDuration;
             characterBody.bodyFlags |= CharacterBody.BodyFlags.IgnoreFallDamage;
-            characterMotor.onHitGroundAuthority += GroundSlam;
+            characterMotor.onHitGroundAuthority += OnHitGroundAuthority;
             Util.PlaySound("ExecutionerSpecialCast", gameObject);
             PlayAnimation("FullBody, Override", "Special1", "Special.playbackRate", upwardDuration);
             Transform modelTransform = GetModelTransform();
@@ -75,12 +84,18 @@ namespace EntityStates.Executioner
             {
                 //This only works if these exist
                 var axeEffectInstance = UnityEngine.Object.Instantiate(axeEffect, axeSpawn, false);
-                axeShaderAnimators = axeEffectInstance.GetComponents<AnimateShaderAlpha>();
+                /*axeShaderAnimators = axeEffectInstance.GetComponents<AnimateShaderAlpha>();
                 foreach (var shaderAlpha in axeShaderAnimators)
-                    shaderAlpha.timeMax = upwardDuration;
+                    shaderAlpha.timeMax = upwardDuration;*/
+                foreach(AnimateShaderAlpha animateShaderAlpha in axeEffectInstance.GetComponents<AnimateShaderAlpha>())
+                {
+                    animateShaderAlpha.timeMax = upwardDuration;
+                }
             }
             if (NetworkServer.active)
-                characterBody.AddBuff(RoR2Content.Buffs.ArmorBoost);
+            {
+                characterBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+            }
             if (isAuthority)
             {
                 characterMotor.Motor.ForceUnground();
@@ -94,7 +109,6 @@ namespace EntityStates.Executioner
                 //aimRequest = cameraTargetParams.RequestAimType(CameraTargetParams.AimType.Aura);
             }
         }
-
         public override void Update()
         {
             base.Update();
@@ -104,7 +118,6 @@ namespace EntityStates.Executioner
                 hasDoneIntro = true;
             }
         }
-
         public override void FixedUpdate()
         {
             base.FixedUpdate();
@@ -122,10 +135,10 @@ namespace EntityStates.Executioner
 
         public void HandleMovement()
         {
-            float moveSpeed = Mathf.Clamp(0f, 11f, 0.5f * moveSpeedStat);
+            //float moveSpeed = Mathf.Clamp(0f, 11f, 0.5f * moveSpeedStat);
             if (fixedAge < upwardDuration)
             {
-                characterMotor.rootMotion += flyVector * (moveSpeed * upwardSpeedCoefficientCurve.value.Evaluate(fixedAge / upwardDuration) * Time.fixedDeltaTime);
+                characterMotor.rootMotion += flyVector * (moveSpeedStat * upwardSpeedCoefficientCurve.value.Evaluate(fixedAge / upwardDuration) * upwardSpeed * Time.fixedDeltaTime);
                 characterMotor.velocity.y = 0f;
             }
             else
@@ -134,36 +147,29 @@ namespace EntityStates.Executioner
             }
         }
 
-        private void GroundSlam(ref CharacterMotor.HitGroundInfo hitGroundInfo)
+        private void OnHitGroundAuthority(ref CharacterMotor.HitGroundInfo hitGroundInfo)
         {
-            //get number of enemies hit to divide damage
             //LogCore.LogI($"Velocity {hitGroundInfo.velocity}");
 
+            float damage = baseDamageCoefficient;
+
+
+
+            //float forceDamage = baseDamageCoefficient * forceDamageCoefficient * Mathf.Clamp(hitGroundInfo.velocity.y / standardDownwardVelocity, 0f, 5f);
+            //damage += forceDamage;
             SphereSearch search = new SphereSearch();
-            List<HurtBox> hits = new List<HurtBox>();
-            List<HealthComponent> hitTargets = new List<HealthComponent>();
-
-            float damage = baseDamageCoefficient - (baseDamageCoefficient * forceDamageCoefficient);
-            float forceDamage = baseDamageCoefficient * forceDamageCoefficient * Mathf.Clamp(hitGroundInfo.velocity.y / standardDownwardVelocity, 0f, 5f);
-            damage += forceDamage;
-
-            search.ClearCandidates();
             search.origin = hitGroundInfo.position;
-            search.radius = slamRadius;
+            search.mask = LayerIndex.entityPrecise.mask;
+            search.radius = slamRadius; 
             search.RefreshCandidates();
-            search.FilterCandidatesByDistinctHurtBoxEntities();
             search.FilterCandidatesByHurtBoxTeam(TeamMask.GetEnemyTeams(teamComponent.teamIndex));
-            search.GetHurtBoxes(hits);
-            hitTargets.Clear();
-            foreach (HurtBox h in hits)
-            {
-                HealthComponent hp = h.healthComponent;
-                if (hp && !hitTargets.Contains(hp))
-                    hitTargets.Add(hp);
-            }
-            if (hitTargets.Count <= 1)
-                damage *= 2f;
+            search.FilterCandidatesByDistinctHurtBoxEntities();
 
+            HurtBox[] results = search.GetHurtBoxes();
+            SS2Log.Info("results length: " + results.Length);
+            SS2Log.Info("initial damage: " + damage);
+            damage *= Mathf.Pow(damageMultiplierPerEnemy, results.Length - 1);
+            SS2Log.Info("after damage: " + damage);
             bool crit = RollCrit();
             BlastAttack blast = new BlastAttack()
             {
@@ -177,8 +183,8 @@ namespace EntityStates.Executioner
                 damageColorIndex = DamageColorIndex.Default,
                 falloffModel = BlastAttack.FalloffModel.None,
                 attackerFiltering = AttackerFiltering.NeverHitSelf,
-                damageType = DamageType.BypassOneShotProtection
             };
+            blast.AddModdedDamageType(ExecutionerSlamDamageType.damageType);
             blast.Fire();
 
             AddRecoil(-0.4f * recoil, -0.8f * recoil, -0.3f * recoil, 0.3f * recoil);
@@ -192,17 +198,20 @@ namespace EntityStates.Executioner
         {
             base.OnExit();
             PlayAnimation("FullBody, Override", "Special4", "Special.playbackRate", 0.4f);
-            characterMotor.onHitGroundAuthority -= GroundSlam;
-            characterBody.bodyFlags -= CharacterBody.BodyFlags.IgnoreFallDamage;
+            characterMotor.onHitGroundAuthority -= OnHitGroundAuthority;
+            characterBody.bodyFlags &= ~CharacterBody.BodyFlags.IgnoreFallDamage;
             if (cameraTargetParams)
             {
                 cameraTargetParams.RemoveParamsOverride(camOverrideHandle, .4f);
                 //cameraTargetParams.RemoveRequest(aimRequest);
             }
             if (NetworkServer.active)
-                characterBody.RemoveBuff(RoR2Content.Buffs.ArmorBoost);
-            if (axeShaderAnimators.Length > 0)
-                axeShaderAnimators[1].enabled = true;
+            {
+                characterBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
+                characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, lingeringInvincibiltyDuration);
+            }
+            /*if (axeShaderAnimators.Length > 0)
+                axeShaderAnimators[1].enabled = true;*/
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

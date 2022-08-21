@@ -26,13 +26,13 @@ namespace EntityStates.Executioner
         public static GameObject ionEffectPrefab;
 
         [HideInInspector]
-        public static GameObject muzzlePrefab = Resources.Load<GameObject>("Prefabs/Effects/Muzzleflashes/MuzzleflashHuntressFlurry");
+        public static GameObject muzzlePrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Muzzleflashes/MuzzleflashHuntressFlurry");
         [HideInInspector]
-        public static GameObject tracerPrefab = Resources.Load<GameObject>("Prefabs/Effects/Tracers/TracerCommandoDefault");
+        public static GameObject tracerPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerCommandoDefault");
         [HideInInspector]
-        public static GameObject hitPrefab = Resources.Load<GameObject>("Prefabs/Effects/HitsparkCommando");
+        public static GameObject hitPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/HitsparkCommando");
 
-        public int shotsFired = 0;
+        public bool isCrit;
 
         private float duration;
         private List<HurtBox> targets;
@@ -48,7 +48,6 @@ namespace EntityStates.Executioner
             Shoot();
             if (!characterBody.HasBuff(SS2Content.Buffs.BuffExecutionerSuperCharged) && !characterBody.HasBuff(SS2Content.Buffs.BuffExecutionerArmor))
                 activatorSkillSlot.DeductStock(1);
-            shotsFired++;
         }
 
         public override void FixedUpdate()
@@ -59,16 +58,18 @@ namespace EntityStates.Executioner
             {
                 if (activatorSkillSlot.stock > 0)
                 {
-                    bool keyDown = IsKeyDownAuthority();
+                    /*bool keyDown = IsKeyDownAuthority();
                     bool shotMinimum = shotsFired >= minimumShotBurst || characterBody.HasBuff(SS2Content.Buffs.BuffExecutionerSuperCharged) | characterBody.HasBuff(SS2Content.Buffs.BuffExecutionerArmor);
                     if (!shotMinimum || keyDown)
                     {
-                        FireIonGun nextState = new FireIonGun();
-                        nextState.shotsFired = shotsFired;
-                        nextState.activatorSkillSlot = activatorSkillSlot;
-                        outer.SetNextState(nextState);
-                        return;
-                    }
+                        
+                    }*/
+                    FireIonGun nextState = new FireIonGun();
+                    //nextState.shotsFired = shotsFired;
+                    nextState.activatorSkillSlot = activatorSkillSlot;
+                    nextState.isCrit = isCrit;
+                    outer.SetNextState(nextState);
+                    return;
                 }
                 outer.SetNextStateToMain();
             }
@@ -77,7 +78,6 @@ namespace EntityStates.Executioner
         private void Shoot()
         {
             //This is desynced, need to network this
-            bool isCrit = RollCrit();
             Util.PlayAttackSpeedSound("ExecutionerSecondary", gameObject, attackSpeedStat);
 
             if (isAuthority)
@@ -118,7 +118,7 @@ namespace EntityStates.Executioner
                     damageType = DamageType.Generic,
                     damageColorIndex = DamageColorIndex.Default,
                     minSpread = 0f,
-                    maxSpread = 0.2f,
+                    maxSpread = 0.5f,
                     falloffModel = BulletAttack.FalloffModel.None,
                     maxDistance = range,
                     force = force,
@@ -127,7 +127,7 @@ namespace EntityStates.Executioner
                     muzzleName = muzzleString,
                     smartCollision = true,
                     procCoefficient = procCoefficient,
-                    radius = 0.5f,
+                    radius = 1f,
                     weapon = gameObject,
                     tracerEffectPrefab = tracerPrefab,
                     hitEffectPrefab = hitPrefab

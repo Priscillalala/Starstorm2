@@ -19,7 +19,7 @@ MonoBehaviour:
     serializedFields:
     - fieldName: baseDuration
       fieldValue:
-        stringValue: 0.9
+        stringValue: 0.6
         objectValue: {fileID: 0}
     - fieldName: speedMultiplier
       fieldValue:

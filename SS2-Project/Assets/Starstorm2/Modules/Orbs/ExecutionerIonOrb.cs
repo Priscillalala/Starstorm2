@@ -9,8 +9,8 @@ namespace Moonstorm.Starstorm2.Orbs
     {
         public ExecutionerController execController;
 
-        private NetworkSoundEventDef sound = SS2Assets.LoadAsset<NetworkSoundEventDef>("SoundEventExecutionerGainCharge");
-        private GameObject orbEffect = SS2Assets.LoadAsset<GameObject>("ExecutionerIonOrbEffect");
+        //private NetworkSoundEventDef sound = SS2Assets.LoadAsset<NetworkSoundEventDef>("SoundEventExecutionerGainCharge");
+        public bool fullRestock;
         private const float speed = 50f;
 
         public override void Begin()
@@ -19,10 +19,12 @@ namespace Moonstorm.Starstorm2.Orbs
             EffectData effectData = new EffectData
             {
                 origin = origin,
-                genericFloat = duration
+                genericFloat = duration,
+                scale = 1f
             };
             effectData.SetHurtBoxReference(target);
-            EffectManager.SpawnEffect(orbEffect, effectData, true);
+            string path = fullRestock ? "ExecutionerIonSuperOrbEffect" : "ExecutionerIonOrbEffect";
+            EffectManager.SpawnEffect(SS2Assets.LoadAsset<GameObject>(path), effectData, true);
             HurtBox hurtBox = target.GetComponent<HurtBox>();
             if (hurtBox)
                 execController = hurtBox.healthComponent.GetComponent<ExecutionerController>();
@@ -32,9 +34,16 @@ namespace Moonstorm.Starstorm2.Orbs
         {
             if (execController)
             {
-                execController.RpcAddIonCharge();
-                if (sound)
-                    EffectManager.SimpleSoundEffect(sound.index, execController.transform.position, true);
+                if (fullRestock)
+                {
+                    execController.RpcRestockIonFull();
+                }
+                else
+                {
+                    execController.RpcAddIonCharge();
+                }
+                //if (sound)
+                    //EffectManager.SimpleSoundEffect(sound.index, execController.transform.position, true);
             }
         }
     }

@@ -26,11 +26,11 @@ MonoBehaviour:
   baseMaxStock: 1
   rechargeStock: 1
   requiredStock: 1
-  stockToConsume: 1
+  stockToConsume: 0
   resetCooldownTimerOnUse: 1
   fullRestockOnAssign: 1
   dontAllowPastMaxStocks: 0
-  beginSkillCooldownOnSkillEnd: 1
+  beginSkillCooldownOnSkillEnd: 0
   cancelSprintingOnActivation: 1
   forceSprintDuringState: 0
   canceledFromSprinting: 0

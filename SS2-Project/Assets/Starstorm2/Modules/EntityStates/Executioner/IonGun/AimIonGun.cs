@@ -19,6 +19,7 @@
             {
                 FireIonGun nextState = new FireIonGun();
                 nextState.activatorSkillSlot = activatorSkillSlot;
+                nextState.isCrit = RollCrit();
                 outer.SetNextState(nextState);
             }
         }

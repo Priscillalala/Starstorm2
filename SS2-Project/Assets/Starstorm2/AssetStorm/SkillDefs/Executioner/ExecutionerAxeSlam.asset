@@ -16,8 +16,7 @@ MonoBehaviour:
   skillNameToken: SS2_EXECUTIONER_AXE_NAME
   skillDescriptionToken: SS2_EXECUTIONER_AXE_DESCRIPTION
   keywordTokens:
-  - KEYWORD_HEAVY
-  - SS2_KEYWORD_EXECUTING
+  - SS2_KEYWORD_ENERGIZING
   icon: {fileID: 21300000, guid: 7302a8882ac3bde409e23c3049833acb, type: 3}
   activationStateMachineName: Weapon
   activationState:

@@ -24,7 +24,7 @@ namespace Moonstorm.Starstorm2.Components
             int orbCount = 1;
             CharacterBody body = GetComponent<CharacterBody>();
             if (body)
-                orbCount = Executioner.GetIonCountFromBody(body);
+                orbCount = ExeIonChargeValuesLegacy.GetIonCountFromBody(body);
             if (report.damageInfo.damageType.HasFlag(DamageType.BypassOneShotProtection))
                 orbCount *= 2;
 

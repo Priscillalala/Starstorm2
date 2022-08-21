@@ -1,21 +1,35 @@
-﻿using RoR2;
+﻿using Moonstorm.Starstorm2.Orbs;
+using RoR2;
+using RoR2.Orbs;
 using UnityEngine;
 using UnityEngine.Networking;
+using R2API;
+using Moonstorm.Starstorm2.DamageTypes;
 
 namespace Moonstorm.Starstorm2.Components
 {
     [RequireComponent(typeof(SkillLocator))]
-    public class ExecutionerController : NetworkBehaviour, IOnDamageDealtServerReceiver, IOnKilledOtherServerReceiver
+    public class ExecutionerController : NetworkBehaviour, IOnKilledOtherServerReceiver
     {
+        [TokenModifier("SS2_KEYWORD_ENERGIZING", StatTypes.Default, 0)]
+        public static int cdrPerSlamKill = 1;
+        private CharacterBody characterBody;
         private GenericSkill secondary;
 
         private void Awake()
         {
-            secondary = GetComponent<SkillLocator>().secondary;
-            secondary.RemoveAllStocks();
+            characterBody = base.GetComponent<CharacterBody>();
+            secondary = characterBody.skillLocator.secondary;
+        }
+        private void Start()
+        {
+            if (secondary)
+            {
+                secondary.RemoveAllStocks();
+            }
         }
 
-        public void OnDamageDealtServer(DamageReport report)
+        /*public void OnDamageDealtServer(DamageReport report)
         {
             //This will break is anyone renames that skilldef's identifier
             if (report.victim.gameObject != report.attacker && !report.victimBody.bodyFlags.HasFlag(CharacterBody.BodyFlags.Masterless) && (secondary.skillDef.skillName == "ExecutionerFireIonGun" || secondary.skillDef.skillName == "ExecutionerFireIonSummon"))
@@ -34,23 +48,47 @@ namespace Moonstorm.Starstorm2.Components
                 var killComponent = report.victim.gameObject.AddComponent<ExecutionerKillComponent>();
                 killComponent.attacker = gameObject;
             }
+        }*/
+        public bool CanRestockSecondary()
+        {
+            return secondary && secondary.skillDef == secondary.defaultSkillDef && secondary.stock < secondary.maxStock;
         }
-
+        [ClientRpc]
+        public void RpcRestockIonFull()
+        {
+            if (CanRestockSecondary())
+            {
+                secondary.stock = secondary.maxStock;
+                Util.PlaySound("ExecutionerMaxCharge", base.gameObject);
+            }
+        }
         [ClientRpc]
         public void RpcAddIonCharge()
         {
-            SkillLocator skillLoc = gameObject.GetComponent<SkillLocator>();
-            GenericSkill ionGunSkill = skillLoc != null ? skillLoc.secondary : null;
-            if (ionGunSkill && ionGunSkill.stock < ionGunSkill.maxStock)
-                ionGunSkill.AddOneStock();
+            if (CanRestockSecondary())
+            {
+                secondary.stock++;
+                Util.PlaySound("ExecutionerGainCharge", base.gameObject);
+            }
         }
 
         public void OnKilledOtherServer(DamageReport damageReport)
         {
-            if (damageReport.victimBody.HasBuff(SS2Content.Buffs.BuffFear))
+            if (!damageReport.victimBody)
             {
-                SkillLocator skillLocator = damageReport.attackerBody.skillLocator;
-                skillLocator.DeductCooldownFromAllSkillsServer(1f);
+                return;
+            }
+            if (CanRestockSecondary() && (damageReport.victimBody.bodyFlags & CharacterBody.BodyFlags.Masterless) == CharacterBody.BodyFlags.None)
+            {
+                ExecutionerIonOrb ionOrb = new ExecutionerIonOrb();
+                ionOrb.origin = damageReport.victimBody.corePosition;
+                ionOrb.target = characterBody.mainHurtBox;
+                ionOrb.fullRestock = damageReport.victimBody.isChampion;
+                OrbManager.instance.AddOrb(ionOrb);
+            }
+            if (damageReport.damageInfo.HasModdedDamageType(ExecutionerSlamDamageType.damageType))
+            {
+                characterBody.skillLocator.DeductCooldownFromAllSkillsServer(cdrPerSlamKill);
             }
         }
     }
