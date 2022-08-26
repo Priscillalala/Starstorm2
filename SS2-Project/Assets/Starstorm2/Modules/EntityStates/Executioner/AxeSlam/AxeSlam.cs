@@ -23,6 +23,7 @@ namespace EntityStates.Executioner
         public static float baseDamageCoefficient = 32f;
         public static float damageMultiplierPerEnemy = 0.85f;
         ///<summary>What percentage of baseDamageCoefficient should be made up of force damage. Put a value between 0 and 1 you ape.</summary>
+        //now unused - prev for Heavy
         //public static float forceDamageCoefficient = 0.5f;
         public static float procCoefficient = 1.0f;
         public static float maxDuration = 10f;
@@ -38,6 +39,7 @@ namespace EntityStates.Executioner
         public static GameObject slamEffect;
         public static GameObject axeEffect;
 
+        //now unused - prev for Heavy
         //This must be recalculated if you fuck with this at all. It's just his velocity when he hits the ground when he doesn't move positions.
         //private const float standardDownwardVelocity = -302.2f;
 
@@ -82,12 +84,9 @@ namespace EntityStates.Executioner
             Transform axeSpawn = FindModelChild("AxeSpawn");
             if (axeSpawn)
             {
-                //This only works if these exist
                 var axeEffectInstance = UnityEngine.Object.Instantiate(axeEffect, axeSpawn, false);
-                /*axeShaderAnimators = axeEffectInstance.GetComponents<AnimateShaderAlpha>();
-                foreach (var shaderAlpha in axeShaderAnimators)
-                    shaderAlpha.timeMax = upwardDuration;*/
-                foreach(AnimateShaderAlpha animateShaderAlpha in axeEffectInstance.GetComponents<AnimateShaderAlpha>())
+                axeShaderAnimators = axeEffectInstance.GetComponents<AnimateShaderAlpha>();
+                foreach (AnimateShaderAlpha animateShaderAlpha in axeShaderAnimators)
                 {
                     animateShaderAlpha.timeMax = upwardDuration;
                 }
@@ -106,7 +105,6 @@ namespace EntityStates.Executioner
                     priority = 0f
                 };
                 camOverrideHandle = cameraTargetParams.AddParamsOverride(request, 0.15f);
-                //aimRequest = cameraTargetParams.RequestAimType(CameraTargetParams.AimType.Aura);
             }
         }
         public override void Update()
@@ -154,7 +152,7 @@ namespace EntityStates.Executioner
             float damage = baseDamageCoefficient;
 
 
-
+            //now unused - prev for Heavy
             //float forceDamage = baseDamageCoefficient * forceDamageCoefficient * Mathf.Clamp(hitGroundInfo.velocity.y / standardDownwardVelocity, 0f, 5f);
             //damage += forceDamage;
             SphereSearch search = new SphereSearch();
@@ -166,10 +164,7 @@ namespace EntityStates.Executioner
             search.FilterCandidatesByDistinctHurtBoxEntities();
 
             HurtBox[] results = search.GetHurtBoxes();
-            SS2Log.Info("results length: " + results.Length);
-            SS2Log.Info("initial damage: " + damage);
             damage *= Mathf.Pow(damageMultiplierPerEnemy, results.Length - 1);
-            SS2Log.Info("after damage: " + damage);
             bool crit = RollCrit();
             BlastAttack blast = new BlastAttack()
             {
@@ -181,9 +176,10 @@ namespace EntityStates.Executioner
                 crit = crit,
                 baseDamage = characterBody.damage * damage,
                 damageColorIndex = DamageColorIndex.Default,
-                falloffModel = BlastAttack.FalloffModel.None,
+                falloffModel = BlastAttack.FalloffModel.SweetSpot,
                 attackerFiltering = AttackerFiltering.NeverHitSelf,
             };
+            //used to identify if the kill should reward cdr
             blast.AddModdedDamageType(ExecutionerSlamDamageType.damageType);
             blast.Fire();
 
@@ -203,20 +199,20 @@ namespace EntityStates.Executioner
             if (cameraTargetParams)
             {
                 cameraTargetParams.RemoveParamsOverride(camOverrideHandle, .4f);
-                //cameraTargetParams.RemoveRequest(aimRequest);
             }
             if (NetworkServer.active)
             {
                 characterBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
                 characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, lingeringInvincibiltyDuration);
             }
-            /*if (axeShaderAnimators.Length > 0)
-                axeShaderAnimators[1].enabled = true;*/
+            //second animate shader alpha handles destroying the effect
+            if (axeShaderAnimators.Length >= 2)
+                axeShaderAnimators[1].enabled = true;
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            return InterruptPriority.Frozen;
         }
     }
 }

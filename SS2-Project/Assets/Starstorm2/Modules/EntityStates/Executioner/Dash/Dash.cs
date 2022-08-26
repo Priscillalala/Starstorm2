@@ -1,6 +1,7 @@
 ﻿using Moonstorm;
 using Moonstorm.Starstorm2;
 using RoR2;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,9 @@ namespace EntityStates.Executioner
         [TokenModifier("SS2_EXECUTIONER_DASH_DESCRIPTION", StatTypes.Default, 0)]
         public static float debuffDuration = 4.0f;
         public static GameObject dashEffect;
+
+        //I ain't afraid of no executioner
+        private static string[] immuneToFearNameTokens = new string[]{ "VOIDRAIDCRAB_BODY_NAME", "BROTHER_BODY_NAME", "SUPERROBOBALLBOSS_BODY_NAME", "DIRESEEKER_BOSS_BODY_NAME" };
 
         private float duration;
         private SphereSearch fearSearch;
@@ -30,7 +34,7 @@ namespace EntityStates.Executioner
             PlayAnimation("FullBody, Override", "Utility", "Utility.playbackRate", duration);
 
             //create dash aoe
-            if (isAuthority)
+            /*if (isAuthority)
             {
                 Vector3 orig = characterBody.corePosition;
                 BlastAttack blast = new BlastAttack()
@@ -48,9 +52,8 @@ namespace EntityStates.Executioner
                     procCoefficient = 0f
                 };
                 blast.Fire();
-            }
+            }*/
 
-            //dash effect
             if (dashEffect)
                 EffectManager.SimpleMuzzleFlash(dashEffect, gameObject, "DashEffect", true);
 
@@ -85,7 +88,7 @@ namespace EntityStates.Executioner
             {
                 HealthComponent hp = h.healthComponent;
                 CharacterBody body = hp?.body;
-                if (body && body != characterBody && !body.bodyFlags.HasFlag(CharacterBody.BodyFlags.Masterless) && body.baseNameToken != "BROTHER_BODY_NAME" && body.baseNameToken != "ULTRAMITH_NAME")
+                if (body && !body.HasBuff(SS2Content.Buffs.BuffFear) && body != characterBody && (body.bodyFlags & CharacterBody.BodyFlags.Masterless) == CharacterBody.BodyFlags.None && Array.IndexOf(immuneToFearNameTokens, body.baseNameToken) == -1)
                 {
                     /*var fear = body.AddItemBehavior<Fear.Behavior>(1);
                     fear.inflictor = characterBody;*/
@@ -102,8 +105,6 @@ namespace EntityStates.Executioner
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-
-            characterBody.isSprinting = true;
 
             if (characterDirection && characterMotor)
                 characterMotor.rootMotion += characterDirection.forward * characterBody.moveSpeed * speedMultiplier * Time.fixedDeltaTime;

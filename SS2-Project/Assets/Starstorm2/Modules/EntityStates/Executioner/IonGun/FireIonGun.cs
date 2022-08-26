@@ -24,13 +24,13 @@ namespace EntityStates.Executioner
         public static int minimumShotBurst = 5;
         public static string muzzleString = "Muzzle";
         public static GameObject ionEffectPrefab;
-
+        public static GameObject tracerPrefab;
         [HideInInspector]
         public static GameObject muzzlePrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Muzzleflashes/MuzzleflashHuntressFlurry");
+        /*[HideInInspector]
+        public static GameObject tracerPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerCommandoDefault");*/
         [HideInInspector]
-        public static GameObject tracerPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerCommandoDefault");
-        [HideInInspector]
-        public static GameObject hitPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/HitsparkCommando");
+        public static GameObject hitPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Muzzleflashes/MuzzleflashHuntressFlurry");
 
         public bool isCrit;
 
@@ -78,6 +78,7 @@ namespace EntityStates.Executioner
         private void Shoot()
         {
             //This is desynced, need to network this
+            //the what?
             Util.PlayAttackSpeedSound("ExecutionerSecondary", gameObject, attackSpeedStat);
 
             if (isAuthority)

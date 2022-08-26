@@ -13,6 +13,7 @@ namespace EntityStates.Executioner
         public static float recoil;
         public static float spreadBloom;
         public static float force;
+        public static float maxDistance;
 
         [HideInInspector]
         public static GameObject muzzleEffectPrefab = Resources.Load<GameObject>("prefabs/effects/muzzleflashes/Muzzleflash1");
@@ -70,7 +71,6 @@ namespace EntityStates.Executioner
 
                 if (isAuthority)
                 {
-                    float dmg = damageCoefficient * damageStat;
                     Ray r = GetAimRay();
                     BulletAttack bullet = new BulletAttack
                     {
@@ -81,7 +81,7 @@ namespace EntityStates.Executioner
                         damageColorIndex = DamageColorIndex.Default,
                         minSpread = 0f,
                         maxSpread = characterBody.spreadBloomAngle * 0.5f,
-                        falloffModel = BulletAttack.FalloffModel.None,
+                        falloffModel = BulletAttack.FalloffModel.DefaultBullet,
                         force = force,
                         isCrit = isCrit,
                         owner = gameObject,
@@ -89,10 +89,11 @@ namespace EntityStates.Executioner
                         smartCollision = true,
                         procChainMask = default(ProcChainMask),
                         procCoefficient = procCoefficient,
-                        radius = 0.35f,
+                        radius = 0.5f,
                         weapon = gameObject,
                         tracerEffectPrefab = tracerPrefab,
-                        hitEffectPrefab = hitPrefab
+                        hitEffectPrefab = hitPrefab,
+                        maxDistance = maxDistance,
                     };
                     bullet.Fire();
                 }

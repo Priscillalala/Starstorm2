@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using HG;
 using UnityEngine.Networking;
 
 namespace Moonstorm.Starstorm2
@@ -128,5 +129,59 @@ namespace Moonstorm.Starstorm2
         }
 
         public static Func<T[], T[]> AppendDel<T>(List<T> list) => (r) => Append(ref r, list);
+    }
+    //Basically ColorAPI from r2api but it actually exists
+    public static class SS2ColorUtil
+    {
+        private static List<ColorCatalog.ColorIndex> customColorIndices = new List<ColorCatalog.ColorIndex>();
+        private static List<DamageColorIndex> customDamageColorIndices = new List<DamageColorIndex>();
+        [SystemInitializer]
+        public static void ModInit()
+        {
+            On.RoR2.ColorCatalog.GetColor += ColorCatalog_GetColor;
+            On.RoR2.ColorCatalog.GetColorHexString += ColorCatalog_GetColorHexString;
+            On.RoR2.DamageColor.FindColor += DamageColor_FindColor;
+        }
+
+        private static Color32 ColorCatalog_GetColor(On.RoR2.ColorCatalog.orig_GetColor orig, ColorCatalog.ColorIndex colorIndex)
+        {
+            if (customColorIndices.Contains(colorIndex))
+            {
+                return ColorCatalog.indexToColor32[(int)colorIndex];
+            }
+            return orig(colorIndex);
+        }
+        private static string ColorCatalog_GetColorHexString(On.RoR2.ColorCatalog.orig_GetColorHexString orig, ColorCatalog.ColorIndex colorIndex)
+        {
+            if (customColorIndices.Contains(colorIndex))
+            {
+                return ColorCatalog.indexToHexString[(int)colorIndex];
+            }
+            return orig(colorIndex);
+        }
+        private static Color DamageColor_FindColor(On.RoR2.DamageColor.orig_FindColor orig, DamageColorIndex colorIndex)
+        {
+            if (customDamageColorIndices.Contains(colorIndex))
+            {
+                return DamageColor.colors[(int)colorIndex];
+            }
+            return orig(colorIndex);
+        }
+
+        public static ColorCatalog.ColorIndex RegisterColor(Color32 color)
+        {
+            ColorCatalog.ColorIndex index = (ColorCatalog.ColorIndex)ColorCatalog.indexToColor32.Length;
+            ArrayUtils.ArrayAppend(ref ColorCatalog.indexToColor32, color);
+            ArrayUtils.ArrayAppend(ref ColorCatalog.indexToHexString, Util.RGBToHex(color));
+            customColorIndices.Add(index);
+            return index;
+        }
+        public static DamageColorIndex RegisterDamageColor(Color color)
+        {
+            ArrayUtils.ArrayAppend(ref DamageColor.colors, color);
+            DamageColorIndex damageColorIndex = (DamageColorIndex)DamageColor.colors.Length - 1;
+            customDamageColorIndices.Add(damageColorIndex);
+            return damageColorIndex;
+        }
     }
 }

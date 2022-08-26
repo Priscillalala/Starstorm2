@@ -10,7 +10,7 @@
 
         
 
-        "SS2_KEYWORD_FEAR": "<style=cKeywordName>Fear</style><style=cSub>Causes afflicted enemies to stop attacking and flee. Enemies afflicted with fear take 50% more damage and have their movement speed slowed by 30%.</style>",
+        "SS2_KEYWORD_FEAR": "<style=cKeywordName>Fear</style><style=cSub>Afflicted enemies flee danger with <style=cIsUtility>{1}%</style> increased movement speed, and take <style=cIsDamage>{0}%</style> extra damage.</style>",
 		"SS2_KEYWORD_EXECUTING": "<style=cKeywordName>Executing</style><style=cSub>Deals doubled damage if no more than 1 enemy is hit.</style>",
 		"SS2_KEYWORD_RECHARGING": "<style=cKeywordName>Recharging</style><style=cSub>Killing enemies restores charges of this skill, depending on the strength of the slain enemy. Doubled charges with kills from Execution.</style>",
         		 "SS2_KEYWORD_ENERGIZING": "<style=cKeywordName>Energizing</style><style=cSub>Reduces all skill cooldowns by <style=cIsUtility>{0}.0s</style> for every slain enemy.</style>",

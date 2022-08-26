@@ -66,3 +66,8 @@ MonoBehaviour:
       fieldValue:
         stringValue: 0
         objectValue: {fileID: 0}
+    - fieldName: tracerPrefab
+      fieldValue:
+        stringValue: 
+        objectValue: {fileID: 1130216254581806, guid: 59990080454439849ab79ae7ba3d665d,
+          type: 3}

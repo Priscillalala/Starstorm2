@@ -19,7 +19,7 @@ MonoBehaviour:
     serializedFields:
     - fieldName: damageCoefficient
       fieldValue:
-        stringValue: 3
+        stringValue: 2.3
         objectValue: {fileID: 0}
     - fieldName: procCoefficient
       fieldValue:
@@ -27,7 +27,7 @@ MonoBehaviour:
         objectValue: {fileID: 0}
     - fieldName: baseDuration
       fieldValue:
-        stringValue: 0.6
+        stringValue: 0.55
         objectValue: {fileID: 0}
     - fieldName: recoil
       fieldValue:
@@ -40,4 +40,8 @@ MonoBehaviour:
     - fieldName: force
       fieldValue:
         stringValue: 200
+        objectValue: {fileID: 0}
+    - fieldName: maxDistance
+      fieldValue:
+        stringValue: 300
         objectValue: {fileID: 0}

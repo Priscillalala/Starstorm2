@@ -19,7 +19,7 @@ MonoBehaviour:
     serializedFields:
     - fieldName: baseDamageCoefficient
       fieldValue:
-        stringValue: 32
+        stringValue: 28
         objectValue: {fileID: 0}
     - fieldName: forceDamageCoefficient
       fieldValue:
@@ -85,5 +85,5 @@ MonoBehaviour:
         objectValue: {fileID: 0}
     - fieldName: damageMultiplierPerEnemy
       fieldValue:
-        stringValue: 0.85
+        stringValue: 0.8
         objectValue: {fileID: 0}

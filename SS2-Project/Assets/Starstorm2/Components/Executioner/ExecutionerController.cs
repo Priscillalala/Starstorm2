@@ -51,6 +51,7 @@ namespace Moonstorm.Starstorm2.Components
         }*/
         public bool CanRestockSecondary()
         {
+            //secondary exists, isnt something like hooks of heresy, and needs more stock
             return secondary && secondary.skillDef == secondary.defaultSkillDef && secondary.stock < secondary.maxStock;
         }
         [ClientRpc]
@@ -67,6 +68,7 @@ namespace Moonstorm.Starstorm2.Components
         {
             if (CanRestockSecondary())
             {
+                //AddOneStock resets the current cd timer
                 secondary.stock++;
                 Util.PlaySound("ExecutionerGainCharge", base.gameObject);
             }

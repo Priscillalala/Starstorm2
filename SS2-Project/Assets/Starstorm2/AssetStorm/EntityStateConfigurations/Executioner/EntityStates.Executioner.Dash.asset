@@ -23,7 +23,7 @@ MonoBehaviour:
         objectValue: {fileID: 0}
     - fieldName: speedMultiplier
       fieldValue:
-        stringValue: 3
+        stringValue: 2
         objectValue: {fileID: 0}
     - fieldName: debuffRadius
       fieldValue:
