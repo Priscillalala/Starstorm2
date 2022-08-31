@@ -27,7 +27,7 @@ MonoBehaviour:
         objectValue: {fileID: 0}
     - fieldName: baseDuration
       fieldValue:
-        stringValue: 0.15
+        stringValue: 0.12
         objectValue: {fileID: 0}
     - fieldName: recoil
       fieldValue:

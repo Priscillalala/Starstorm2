@@ -17,7 +17,8 @@ namespace EntityStates.Executioner
         public static GameObject dashEffect;
 
         //I ain't afraid of no executioner
-        private static string[] immuneToFearNameTokens = new string[]{ "VOIDRAIDCRAB_BODY_NAME", "BROTHER_BODY_NAME", "SUPERROBOBALLBOSS_BODY_NAME", "DIRESEEKER_BOSS_BODY_NAME" };
+        //this is kind of a goofy solution, but bosses have different body names in different phases
+        private static string[] immuneToFearNameTokens = new string[]{ "VOIDRAIDCRAB_BODY_NAME", "BROTHER_BODY_NAME", "SUPERROBOBALLBOSS_BODY_NAME", "DIRESEEKER_BOSS_BODY_NAME", "TITANGOLD_BODY_NAME" };
 
         private float duration;
         private SphereSearch fearSearch;
